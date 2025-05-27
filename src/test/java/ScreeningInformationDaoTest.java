@@ -1,13 +1,13 @@
 import org.scoula.db.dao.ScreeningInformationDao;
-import org.scoula.db.dao.ScreeningInformationImpl;
+import org.scoula.db.dao.ScreeningInformationDaoImpl;
 import org.scoula.db.domain.ScreeningInformationVO;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class ScreeningInformationTest {
+public class ScreeningInformationDaoTest {
     public static void main(String[] args) {
-        ScreeningInformationDao dao = new ScreeningInformationImpl();
+        ScreeningInformationDao dao = new ScreeningInformationDaoImpl();
 
         ScreeningInformationVO newInfo = ScreeningInformationVO.builder()
                 .dateTime(LocalDateTime.of(2025, 5, 23, 12, 0))
@@ -41,5 +41,7 @@ public class ScreeningInformationTest {
         for (ScreeningInformationVO info : finalList) {
             System.out.println(info);
         }
+        int remainTicket = dao.getRemainTicket(1);
+        System.out.println("상영 정보 1번의 여석 수: "+remainTicket);
     }
 }
