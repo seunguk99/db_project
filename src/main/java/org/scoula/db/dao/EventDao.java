@@ -11,4 +11,6 @@ public interface EventDao {
     void update(EventVO event);
     void delete(int id);
 
+    List<EventVO> getEvents();
+    EventVO getEvent(int id);
 }
