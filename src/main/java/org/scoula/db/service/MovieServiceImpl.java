@@ -8,11 +8,15 @@ import org.scoula.db.domain.ScreeningInformationVO;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor
 public class MovieServiceImpl implements MovieService {
     final MovieDao movieDao;
     final ScreeningInformationDao screeningDao;
+    DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("MM/dd HH:mm");
+    DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일");
 
     @Override
     public void getAllMoviesByRatingDesc() {
@@ -38,8 +42,8 @@ public class MovieServiceImpl implements MovieService {
                 System.out.println("제목: " + movie.getTitle());
                 System.out.println("평점: " + movie.getRating());
                 System.out.println("상영시간: " + movie.getRunning_time() + "분");
-                System.out.println("연령제한: " + movie.getAge_restriction());
-                System.out.println("개봉일: " + movie.getRelease_date());
+                System.out.println("연령제한: " + movie.getAge_restriction() + "세");
+                System.out.println("개봉일: " + movie.getRelease_date().format(formatter2));
                 System.out.println("감독: " + movie.getDirector());
                 System.out.println("장르: " + movie.getGenre());
             } else {
@@ -58,7 +62,8 @@ public class MovieServiceImpl implements MovieService {
             if (screeningList != null && !screeningList.isEmpty()) {
                 System.out.println("\n============ 상영 시간표 =============");
                 for (ScreeningInformationVO screening : screeningList) {
-                    System.out.println("상영일시: " + screening.getDateTime());
+                    LocalDateTime dateTime = screening.getDateTime();
+                    System.out.println("상영일시: " + dateTime.format(formatter1));
                 }
             } else {
                 System.out.println("해당 영화의 상영 정보를 찾을 수 없습니다.");
