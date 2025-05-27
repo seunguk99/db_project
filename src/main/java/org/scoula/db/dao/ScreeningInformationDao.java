@@ -12,4 +12,5 @@ public interface ScreeningInformationDao {
     List<ScreeningInformationVO> getList();
     void update(ScreeningInformationVO screeningInformation);
     void delete(int screeningId);
+    List<ScreeningInformationVO> getScreeningInformationBymovieID(int movieId);
 }
