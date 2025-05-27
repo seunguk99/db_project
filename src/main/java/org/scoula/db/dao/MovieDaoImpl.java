@@ -2,6 +2,7 @@ package org.scoula.db.dao;
 
 import org.scoula.db.common.JDBCUtil;
 import org.scoula.db.domain.MovieVO;
+import org.scoula.db.domain.ScreeningInformationVO;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,7 +17,11 @@ public class MovieDaoImpl implements MovieDao {
     private String MOVIE_INSERT = "insert into movie(title, rating, running_time, age_restriction, release_date, director, genre) values(?, ?, ?, ?, ?, ?, ?)";
     private String MOVIE_UPDATE = "update movie set title = ?, rating = ?, running_time = ?, age_restriction = ?, release_date = ?, director = ?, genre = ? where movie_id = ?";
     private String MOVIE_DELETE = "delete from movie where movie_id = ?";
-
+    private String MOVIE_SELECT_BY_RATING =
+            """
+            SELECT title,rating FROM movie
+            ORDER BY rating DESC
+            """;
     @Override
     public int create(MovieVO movie) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(MOVIE_INSERT)) {
@@ -41,6 +46,53 @@ public class MovieDaoImpl implements MovieDao {
         movie.setDirector(rs.getString("director"));
         movie.setGenre(rs.getString("genre"));
         return movie;
+    }
+    @Override
+    public MovieVO getMovieInformation(int movieId) throws SQLException{
+        String sql = """
+                SELECT title,rating,running_time,age_restriction,release_date,director,genre 
+                FROM movie
+                WHERE movie_id = ?
+                """;
+        MovieVO movie = new MovieVO();
+        Connection conn = JDBCUtil.getConnection();
+        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setInt(1,movieId);
+            try(ResultSet rs = pstmt.executeQuery()){
+                if(rs.next()){
+                    movie.setTitle(rs.getString("title"));
+                    movie.setRating(rs.getDouble("rating"));
+                    movie.setRunning_time(rs.getInt("running_time"));
+                    movie.setAge_restriction(rs.getInt("age_restriction"));
+                    movie.setRelease_date(rs.getTimestamp("release_date").toLocalDateTime());
+                    movie.setDirector(rs.getString("director"));
+                    movie.setGenre(rs.getString("genre"));
+                }
+            }
+        }
+        return movie;
+    }
+    @Override
+    public List<MovieVO> getListByRating() throws SQLException{
+        List<MovieVO> movieList = new ArrayList<>();
+        Connection conn = JDBCUtil.getConnection();
+
+        String MOVIE_SELECT_BY_RATING = """
+            SELECT movie_id, title, rating FROM movie
+            ORDER BY rating DESC
+            """;
+
+        try (PreparedStatement stmt = conn.prepareStatement(MOVIE_SELECT_BY_RATING);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                MovieVO movie = new MovieVO();
+                movie.setMovie_id(rs.getInt("movie_id"));
+                movie.setTitle(rs.getString("title"));
+                movie.setRating(rs.getDouble("rating"));
+                movieList.add(movie);
+            }
+        }
+        return movieList;
     }
     @Override
     public List<MovieVO> getList() throws SQLException {

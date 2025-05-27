@@ -1,4 +1,5 @@
 package org.scoula.db.service;
 
-public class ReservationService {
+public interface ReservationService {
+    void printReservationList();
 }

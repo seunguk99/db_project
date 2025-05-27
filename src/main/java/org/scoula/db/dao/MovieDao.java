@@ -12,5 +12,6 @@ public interface MovieDao {
     Optional<MovieVO> get(int id) throws SQLException;
     int update(MovieVO movie) throws SQLException;
     int delete(int id) throws SQLException;
-
+    List<MovieVO> getListByRating() throws SQLException;
+    MovieVO getMovieInformation(int movieId) throws SQLException;
 }
