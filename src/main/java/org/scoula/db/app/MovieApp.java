@@ -1,13 +1,12 @@
 package org.scoula.db.app;
 
 import org.scoula.db.common.JDBCUtil;
-import org.scoula.db.dao.MovieDao;
-import org.scoula.db.dao.MovieDaoImpl;
-import org.scoula.db.dao.ScreeningInformationDao;
-import org.scoula.db.dao.ScreeningInformationImpl;
+import org.scoula.db.dao.*;
 import org.scoula.db.domain.MovieVO;
 import org.scoula.db.service.MovieService;
 import org.scoula.db.service.MovieServiceImpl;
+import org.scoula.db.service.ReservationService;
+import org.scoula.db.service.ReservationServiceImpl;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -85,10 +84,19 @@ public class MovieApp {
                     showMovieSelection();
                     break;
                 case 2:
-                    // 현재 여석 보여주는 함수 호출
-                    System.out.println("현재 인원은 (여기에 남은 좌석 출력)석입니다.");
-                    System.out.println("인원 수 : (여기에 사용자가 입력)");
-                    System.out.println("=== 구현이 안되어있으므로 종료 ===");
+                    //예매 내역 출력 후 다시 처음으로
+                    ReservationDao reservationDao = new ReservationDaoImpl();
+                    ScreeningInformationDao screeningDao = new ScreeningInformationImpl();
+                    MovieDao movieDao = new MovieDaoImpl();
+                    ReservationService reservationService = new ReservationServiceImpl(
+                            reservationDao, screeningDao, movieDao
+                    );
+
+                    System.out.println("\n[📜 현재 예매 내역 출력 ]");
+                    reservationService.printReservationList();
+
+                    //다시 처음으로
+                    showMovieSelection();
                     break;
                 case 3:
                     exit();
@@ -102,6 +110,7 @@ public class MovieApp {
             showDetailOptions();
         }
     }
+
 
     public void exit() {
         System.out.println("\n 영화 예매 시스템을 종료합니다.");
