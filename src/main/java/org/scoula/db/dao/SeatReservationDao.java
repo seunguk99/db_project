@@ -7,8 +7,8 @@ import java.util.Optional;
 
 public interface SeatReservationDao {
     void insert(SeatReservationVO vo);
-    Optional<SeatReservationVO> findById(Long seatResId);
+    Optional<SeatReservationVO> findById(int seatResId);
     List<SeatReservationVO> findAll();
     void update(SeatReservationVO vo);
-    void delete(Long seatResId);
+    void delete(int seatResId);
 }

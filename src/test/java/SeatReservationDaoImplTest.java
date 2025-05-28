@@ -12,8 +12,8 @@ public class SeatReservationDaoImplTest {
 
         // 1. INSERT
         SeatReservationVO vo = SeatReservationVO.builder()
-                .seatId(1L)
-                .reservationId(1L)
+                .seatId(1)
+                .reservationId(1)
                 .build();
         dao.insert(vo);
         System.out.println("좌석 예약 등록 완료");
@@ -24,15 +24,15 @@ public class SeatReservationDaoImplTest {
         all.forEach(System.out::println);
 
         // 3. SELECT BY ID
-        Long lastId = all.get(all.size() - 1).getSeatResId(); // 방금 삽입한 마지막 ID 기준
+        int lastId = all.get(all.size() - 1).getSeatResId(); // 방금 삽입한 마지막 ID 기준
         Optional<SeatReservationVO> opt = dao.findById(lastId);
         opt.ifPresent(res -> System.out.println("\n특정 좌석 예약 조회: " + res));
 
         // 4. UPDATE
         SeatReservationVO updated = SeatReservationVO.builder()
                 .seatResId(lastId)
-                .seatId(2L)
-                .reservationId(3L)
+                .seatId(2)
+                .reservationId(3)
                 .build();
         dao.update(updated);
         System.out.println("\n좌석 예약 정보 수정 완료");

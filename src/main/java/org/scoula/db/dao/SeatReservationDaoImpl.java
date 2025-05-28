@@ -17,9 +17,9 @@ public class SeatReservationDaoImpl implements SeatReservationDao {
 
     private SeatReservationVO map(ResultSet rs) throws SQLException {
         return SeatReservationVO.builder()
-                .seatResId(rs.getLong("seat_res_id"))
-                .seatId(rs.getLong("seat_id"))
-                .reservationId(rs.getLong("reservation_id"))
+                .seatResId(rs.getInt("seat_res_id"))
+                .seatId(rs.getInt("seat_id"))
+                .reservationId(rs.getInt("reservation_id"))
                 .build();
     }
 
@@ -36,7 +36,7 @@ public class SeatReservationDaoImpl implements SeatReservationDao {
     }
 
     @Override
-    public Optional<SeatReservationVO> findById(Long seatResId) {
+    public Optional<SeatReservationVO> findById(int seatResId) {
         String sql = "SELECT * FROM seat_reservation WHERE seat_res_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, seatResId);
@@ -79,10 +79,10 @@ public class SeatReservationDaoImpl implements SeatReservationDao {
     }
 
     @Override
-    public void delete(Long seatResId) {
+    public void delete(int seatResId) {
         String sql = "DELETE FROM seat_reservation WHERE seat_res_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, seatResId);
+            pstmt.setInt(1, seatResId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
