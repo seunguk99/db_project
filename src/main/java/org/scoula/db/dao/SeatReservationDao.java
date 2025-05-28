@@ -1,9 +1,8 @@
 package org.scoula.db.dao;
 
-import org.scoula.db.domain.SeatReservationVO;
-
 import java.util.List;
 import java.util.Optional;
+import org.scoula.db.domain.SeatReservationVO;
 
 public interface SeatReservationDao {
     void insert(SeatReservationVO vo);
@@ -11,4 +10,5 @@ public interface SeatReservationDao {
     List<SeatReservationVO> findAll();
     void update(SeatReservationVO vo);
     void delete(int seatResId);
+    void deleteByResId(int resId);
 }

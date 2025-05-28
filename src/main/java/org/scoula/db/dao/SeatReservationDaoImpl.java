@@ -1,8 +1,5 @@
 package org.scoula.db.dao;
 
-import org.scoula.db.common.JDBCUtil;
-import org.scoula.db.domain.SeatReservationVO;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.scoula.db.common.JDBCUtil;
+import org.scoula.db.domain.SeatReservationVO;
 
 public class SeatReservationDaoImpl implements SeatReservationDao {
 
@@ -83,6 +82,17 @@ public class SeatReservationDaoImpl implements SeatReservationDao {
         String sql = "DELETE FROM seat_reservation WHERE seat_res_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, seatResId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteByResId(int resId) {
+        String sql = "DELETE FROM seat_reservation WHERE reservation_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, resId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
