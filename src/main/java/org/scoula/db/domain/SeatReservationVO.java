@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class SeatReservationVO {
-    private Long seatResId;
-    private Long seatId;
-    private Long reservationId;
+    private int seatResId;
+    private int seatId;
+    private int reservationId;
 }
