@@ -1,8 +1,5 @@
 package org.scoula.db.dao;
 
-import org.scoula.db.common.JDBCUtil;
-import org.scoula.db.domain.SeatReservationVO;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.scoula.db.common.JDBCUtil;
+import org.scoula.db.domain.SeatReservationVO;
 
 public class SeatReservationDaoImpl implements SeatReservationDao {
 
@@ -17,9 +16,9 @@ public class SeatReservationDaoImpl implements SeatReservationDao {
 
     private SeatReservationVO map(ResultSet rs) throws SQLException {
         return SeatReservationVO.builder()
-                .seatResId(rs.getLong("seat_res_id"))
-                .seatId(rs.getLong("seat_id"))
-                .reservationId(rs.getLong("reservation_id"))
+                .seatResId(rs.getInt("seat_res_id"))
+                .seatId(rs.getInt("seat_id"))
+                .reservationId(rs.getInt("reservation_id"))
                 .build();
     }
 
@@ -36,7 +35,7 @@ public class SeatReservationDaoImpl implements SeatReservationDao {
     }
 
     @Override
-    public Optional<SeatReservationVO> findById(Long seatResId) {
+    public Optional<SeatReservationVO> findById(int seatResId) {
         String sql = "SELECT * FROM seat_reservation WHERE seat_res_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, seatResId);
@@ -79,10 +78,21 @@ public class SeatReservationDaoImpl implements SeatReservationDao {
     }
 
     @Override
-    public void delete(Long seatResId) {
+    public void delete(int seatResId) {
         String sql = "DELETE FROM seat_reservation WHERE seat_res_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, seatResId);
+            pstmt.setInt(1, seatResId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteByResId(int resId) {
+        String sql = "DELETE FROM seat_reservation WHERE reservation_id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, resId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);

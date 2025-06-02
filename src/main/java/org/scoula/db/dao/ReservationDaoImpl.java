@@ -1,13 +1,17 @@
 package org.scoula.db.dao;
 
-import org.scoula.db.common.JDBCUtil;
-import org.scoula.db.domain.ReservationVO;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.scoula.db.common.JDBCUtil;
+import org.scoula.db.dao.dto.ReservationDetail;
+import org.scoula.db.domain.ReservationVO;
 
 public class ReservationDaoImpl implements ReservationDao {
     Connection conn = JDBCUtil.getConnection();
@@ -16,6 +20,18 @@ public class ReservationDaoImpl implements ReservationDao {
     private String RESERV_INSERT = "insert into reservation values(?, ?, ?, ?, ?)";
     private String RESERV_UPDATE = "update reservation set reservation_status = ? where reservation_id = ?";
     private String RESERV_DELETE = "delete from reservation where reservation_id = ?";
+    private String RESERV_DETAIL = """
+        select r.reservation_id, m.title, r.reservation_date, group_concat(concat(s.seat_row, s.seat_column) order by s.seat_row, s.seat_column) as seats
+        from reservation r
+                 inner join seat_reservation sr on r.reservation_id = sr.reservation_id
+                 inner join seat s on sr.seat_id = s.seat_id
+                 inner join screening_information si on r.screening_id = si.screening_id
+                 inner join movie m on si.movie_id = m.movie_id
+        where r.reservation_status != '취소'
+        group by r.reservation_id, r.reservation_date, m.title;
+        """;
+    private String RESERV_CANCEL = "update reservation set reservation_status = '취소' WHERE reservation_id = ?";
+
 
     @Override
     public int create(ReservationVO reservation) throws SQLException {
@@ -53,7 +69,7 @@ public class ReservationDaoImpl implements ReservationDao {
     }
 
     @Override
-    public Optional<ReservationVO> get(int id) throws SQLException {
+    public Optional<ReservationVO> get(int id) {
         try (PreparedStatement pstmt = conn.prepareStatement(RESERV_GET)) {
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -61,6 +77,8 @@ public class ReservationDaoImpl implements ReservationDao {
                     return Optional.of(map(rs));
                 }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return Optional.empty();
     }
@@ -79,6 +97,38 @@ public class ReservationDaoImpl implements ReservationDao {
         try (PreparedStatement pstmt = conn.prepareStatement(RESERV_DELETE)) {
             pstmt.setInt(1, id);
             return pstmt.executeUpdate();
+        }
+    }
+
+    @Override
+    public List<ReservationDetail> getReservationDetail() {
+        List<ReservationDetail> details = new ArrayList<>();
+        try (PreparedStatement pstmt = conn.prepareStatement(RESERV_DETAIL);
+            ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                ReservationDetail detail = ReservationDetail.builder()
+                    .id(rs.getInt("reservation_id"))
+                    .movieTitle(rs.getString("title"))
+                    .reservationDate(rs.getTimestamp("reservation_date").toLocalDateTime())
+                    .seats(rs.getString("seats"))
+                    .build();
+                details.add(detail);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return details;
+    }
+
+    @Override
+    public int cancelReservation(int reservationId) {
+        try (PreparedStatement pstmt = conn.prepareStatement(RESERV_CANCEL)) {
+            pstmt.setInt(1, reservationId);
+            return pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
