@@ -50,6 +50,7 @@ public class ScreeningInformationImpl implements ScreeningInformationDao {
 
         return screeningList;
     }
+
     @Override
     public ScreeningInformationVO get(int screeningId) {
         String sql = "SELECT * FROM screening_information WHERE screening_id = ?";
@@ -110,5 +111,30 @@ public class ScreeningInformationImpl implements ScreeningInformationDao {
         } catch (SQLException e) {
             throw new RuntimeException("삭제 실패", e);
         }
+    }
+
+    @Override
+    public int getRemainTicket(int screeningId) {
+        int remainTicket = -1;
+        String sql =
+                """
+                        SELECT
+                            SUM(r.number_of_people) AS reserved_seats
+                        FROM
+                            reservation r
+                        WHERE
+                            r.screening_id = ? AND r.reservation_status IN ('확정', '대기');
+                """;
+        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setInt(1, screeningId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                remainTicket = rs.getInt("reserved_seats");
+            }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException("여석 수 가져오기 실패", e);
+        }
+        return remainTicket;
     }
 }

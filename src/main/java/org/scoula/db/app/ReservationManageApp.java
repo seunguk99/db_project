@@ -11,11 +11,11 @@ import org.scoula.db.dao.dto.ReservationDetail;
 import org.scoula.db.service.ReservationCancelService;
 import org.scoula.db.service.ReservationCancelServiceImpl;
 
-public class ReservationCancelApp {
+public class ReservationManageApp {
     ReservationCancelService reservationCancelService;
     Scanner scanner = new Scanner(System.in);
 
-    public ReservationCancelApp() {
+    public ReservationManageApp() {
         ReservationDao reservationDao = new ReservationDaoImpl();
         SeatReservationDao seatReservationDao = new SeatReservationDaoImpl();
         reservationCancelService = new ReservationCancelServiceImpl(reservationDao, seatReservationDao);
@@ -47,7 +47,7 @@ public class ReservationCancelApp {
             System.out.println("----------------------------------------");
             System.out.println();
         }
-        scanner.close();
+//        scanner.close();
 
     }
 
@@ -74,7 +74,7 @@ public class ReservationCancelApp {
     }
 
     public static void main(String[] args) throws SQLException {
-        ReservationCancelApp app = new ReservationCancelApp();
+        ReservationManageApp app = new ReservationManageApp();
         app.run();
 
     }

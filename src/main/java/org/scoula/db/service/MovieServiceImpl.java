@@ -7,9 +7,12 @@ import org.scoula.db.domain.MovieVO;
 import org.scoula.db.domain.ScreeningInformationVO;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class MovieServiceImpl implements MovieService {
@@ -55,15 +58,18 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public void getMovieShowtimeByIdAsc(int movieId) {
+    public Set<Integer> getMovieShowtimeByIdAsc(int movieId) {
+        Set<Integer> screeningIdSet = null;
         try {
             List<ScreeningInformationVO> screeningList = screeningDao.getScreeningInformationBymovieID(movieId);
-
+            screeningIdSet = new HashSet<>();
             if (screeningList != null && !screeningList.isEmpty()) {
                 System.out.println("\n============ 상영 시간표 =============");
                 for (ScreeningInformationVO screening : screeningList) {
+                    int screeningId = screening.getScreeningId();
+                    screeningIdSet.add(screeningId);
                     LocalDateTime dateTime = screening.getDateTime();
-                    System.out.println("상영일시: " + dateTime.format(formatter1));
+                    System.out.println("상영 ID: "+screeningId+", 상영일시: " + dateTime.format(formatter1));
                 }
             } else {
                 System.out.println("해당 영화의 상영 정보를 찾을 수 없습니다.");
@@ -71,5 +77,6 @@ public class MovieServiceImpl implements MovieService {
         } catch (Exception e) {
             System.err.println("상영 정보 조회 실패: " + e.getMessage());
         }
+        return screeningIdSet;
     }
 }

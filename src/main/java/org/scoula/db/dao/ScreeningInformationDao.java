@@ -13,4 +13,5 @@ public interface ScreeningInformationDao {
     void update(ScreeningInformationVO screeningInformation);
     void delete(int screeningId);
     List<ScreeningInformationVO> getScreeningInformationBymovieID(int movieId);
+    int getRemainTicket(int screeningId);
 }

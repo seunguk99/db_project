@@ -1,52 +1,103 @@
 package org.scoula.db.service;
 
-import lombok.RequiredArgsConstructor;
-import org.scoula.db.dao.*;
-import org.scoula.db.domain.*;
+import org.scoula.db.dao.ReservationDao;
+import org.scoula.db.dao.ReservationDaoImpl;
+import org.scoula.db.dao.SeatReservationDaoImpl;
+import org.scoula.db.domain.ReservationVO;
+import org.scoula.db.domain.SeatReservationVO;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Scanner;
 
-@RequiredArgsConstructor
 public class ReservationServiceImpl implements ReservationService {
+    ReservationDao dao = new ReservationDaoImpl();
+    SeatReservationDaoImpl seatDao = new SeatReservationDaoImpl();
+    List<Integer> reservedSeats;
+    boolean[][] isReserved;
+    char[] rowLabels = {'A', 'B', 'C', 'D'};
+    int createdId = -1;
+    Scanner scanner;
 
-    private final ReservationDao reservationDao;
-    private final ScreeningInformationDao screeningDao;
-    private final MovieDao movieDao;
+    public ReservationServiceImpl(Scanner scanner) {
+        this.scanner = scanner;
+    }
 
     @Override
-    public void printReservationList() {
-        List<ReservationVO> reservations;
-        try {
-            reservations = reservationDao.getList();
-        } catch (SQLException e) {
-            throw new RuntimeException("예매 내역을 불러오는 데 실패했습니다.", e);
+    public void printTheater(int screeningID) {
+        isReserved = new boolean[4][4];
+        try{
+            reservedSeats=null;
+            reservedSeats=dao.getReservedSeats(screeningID);
         }
-
-        System.out.println("===== 예매 내역 전체 리스트 =====");
-        for (ReservationVO r : reservations) {
-            ScreeningInformationVO screening = screeningDao.get(r.getScreening_id());
-
-            MovieVO movie = null;
-            if (screening != null) {
-                try {
-                    movie = movieDao.get(screening.getMovieId()).orElse(null);
-                } catch (SQLException e) {
-                    throw new RuntimeException("영화 정보를 가져오는 중 오류 발생", e);
-                }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        for(int seatId : reservedSeats){
+            isReserved[seatId/4][seatId%4] = true;
+        }
+        System.out.println("   1     2     3     4");
+        for (int i = 0; i < isReserved.length; i++) {
+            System.out.print(rowLabels[i] + "  ");
+            for (int j = 0; j < isReserved[i].length; j++) {
+                System.out.print((isReserved[i][j] ? "■" : "□") + "     ");
             }
+            System.out.println();
+        }
+    }
 
-            System.out.printf("예매번호: %d | 인원: %d명 | 상태: %s | 예매일: %s\n",
-                    r.getReservation_id(),
-                    r.getNumber_of_people(),
-                    r.getReservation_status(),
-                    r.getReservation_date());
+    @Override
+    public void makeReservation(int screeningID, int num) {
+        ReservationVO reservationVO = ReservationVO.builder()
+                .reservation_date(LocalDateTime.now())
+                .reservation_status("확정")
+                .number_of_people(num)
+                .screening_id(screeningID)
+                .build();
+        try{
+            createdId=dao.create(reservationVO);
+            System.out.println("생성된 예약 ID: " + createdId);
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
 
-            if (movie != null && screening != null) {
-                System.out.printf(" └ 영화: %s (%s) | 상영시간: %s\n\n",
-                        movie.getTitle(), movie.getGenre(), screening.getDateTime());
+    @Override
+    public void makeSeatReservation(int screeningID) {
+
+        while(true){
+            System.out.print("좌석을 입력하세요 (예: A2): ");
+            String seatName = scanner.nextLine();
+
+            if (seatName.matches("^(A|B|C|D)[1-4]$")) {
+                int row = seatName.charAt(0) - 'A';
+                int col = Character.getNumericValue(seatName.charAt(1)) - 1;
+                int seatId = row * 4 + col + 1;
+                if(!isReserved[row][col]){
+                    SeatReservationVO seatReservation = SeatReservationVO.builder()
+                            .seatId(seatId)
+                            .reservationId(createdId)
+                            .build();
+
+                    seatDao.insert(seatReservation);
+                    System.out.println("예약이 완료되었습니다: " + seatName);
+                    break;
+                }
+                else{
+                    System.out.println("예약된 좌석입니다. 다시 시도해주세요.");
+                }
+            } else {
+                System.out.println("잘못된 좌석 입력입니다. 다시 시도해주세요.");
             }
         }
     }
 
+//    public static void main(String[] args) {
+//        ReservationServiceImpl reservationService = new ReservationServiceImpl();
+//        reservationService.printTheater(1);
+//        reservationService.makeReservation(1,2);
+//        reservationService.makeSeatReservation(1);
+//    }
 }
