@@ -1,33 +1,41 @@
 package org.scoula.db.app;
 
-import org.scoula.db.common.JDBCUtil;
-import org.scoula.db.dao.*;
-import org.scoula.db.service.MovieServiceImpl;
-import org.scoula.db.service.ReservationService;
-import org.scoula.db.service.ReservationServiceImpl;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main {
+    private static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
-        // 1. 영화 선택 및 상세 보기 실행 (MovieApp 흐름)
-        MovieApp movieApp = new MovieApp();
-        movieApp.run();  // 사용자에게 영화 목록 보여주고 선택하게 함
+        ReservationApp reservationApp = new ReservationApp();
+        EventApp eventApp = new EventApp();
+        ReservationManageApp reservationManageApp = new ReservationManageApp();
 
-        // 2. 영화 흐름 끝나고 예매 내역 전체 출력
-        System.out.println("\n================ 예매 내역 출력 ================\n");
-
-        // ReservationService 생성
-        ReservationDao reservationDao = new ReservationDaoImpl();
-        ScreeningInformationDao screeningDao = new ScreeningInformationImpl();
-        MovieDao movieDao = new MovieDaoImpl();
-
-        ReservationService reservationService = new ReservationServiceImpl(
-                reservationDao, screeningDao, movieDao
+        List<MenuItem> menu = List.of(
+                new MenuItem("영화 예매", reservationApp::run),
+                new MenuItem("진행 중인 이벤트", eventApp::run),
+                new MenuItem("예매 관리하기", () -> {
+                    try {
+                        reservationManageApp.run();
+                    } catch (Exception e) {
+                        System.out.println("예매 관리 실행 중 오류가 발생했습니다: " + e.getMessage());
+                    }
+                }),
+                new MenuItem("종료", () -> System.exit(0))
         );
+        while (true) {
+            System.out.println("\n===== 메뉴 =====");
+            for (int i = 0; i < menu.size(); i++) {
+                System.out.println((i + 1) + ". " + menu.get(i).getTitle());
+            }
+            System.out.print("선택: ");
+            int choice = Integer.parseInt(scanner.nextLine());
 
-        // 예매 내역 출력
-        reservationService.printReservationList();
-
-        // DB 연결 종료
-        JDBCUtil.close();
+            if (choice >= 1 && choice <= menu.size()) {
+                menu.get(choice - 1).getCommand().run(); // 선택된 항목 실행
+            } else {
+                System.out.println("잘못된 선택입니다.");
+            }
+        }
     }
 }

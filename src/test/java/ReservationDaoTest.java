@@ -21,8 +21,8 @@ class ReservationDaoTest {
     @Order(1)
     void create() throws SQLException {
         ReservationVO reservation = new ReservationVO(7, 1, LocalDateTime.now(), "대기", 1);
-        int count = dao.create(reservation);
-        Assertions.assertEquals(1, count);
+        int id = dao.create(reservation);
+        Assertions.assertNotEquals(-1, id);
     }
 
     @Test

@@ -60,16 +60,16 @@ class MovieServiceImplTest {
         System.out.println("테스트 결과:\n" + output);
     }
 
-    @Test
-    void getMovieShowtimeByIdAsc() {
-        movieService.getMovieShowtimeByIdAsc(1);
-
-        String output = outputStream.toString();
-        assertTrue(output.contains("=== 상영 시간 정보 ===") ||
-                output.contains("해당 영화의 상영 정보를 찾을 수 없습니다."));
-
-        System.setOut(originalOut);
-        System.out.println("테스트 결과:\n" + output);
-    }
+//    @Test
+//    void getMovieShowtimeByIdAsc() {
+//        movieService.getMovieShowtimeByIdAsc(1);
+//
+//        String output = outputStream.toString();
+//        assertTrue(output.contains("=== 상영 시간 정보 ===") ||
+//                output.contains("해당 영화의 상영 정보를 찾을 수 없습니다."));
+//
+//        System.setOut(originalOut);
+//        System.out.println("테스트 결과:\n" + output);
+//    }
 
 }

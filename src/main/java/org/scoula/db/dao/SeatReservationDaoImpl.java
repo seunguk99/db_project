@@ -23,7 +23,7 @@ public class SeatReservationDaoImpl implements SeatReservationDao {
     }
 
     @Override
-    public void insert(SeatReservationVO vo) {
+    public void insert(SeatReservationVO vo){
         String sql = "INSERT INTO seat_reservation(seat_id, reservation_id) VALUES (?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, vo.getSeatId());

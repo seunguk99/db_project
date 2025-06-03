@@ -14,4 +14,6 @@ public interface ReservationDao {
     int delete(int id) throws SQLException;
     List<ReservationDetail> getReservationDetail();
     int cancelReservation(int reservationId);
+    public List<Integer> getReservedSeats(int screeningID) throws SQLException;
+
 }

@@ -1,10 +1,6 @@
 package org.scoula.db.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +13,7 @@ public class ReservationDaoImpl implements ReservationDao {
     Connection conn = JDBCUtil.getConnection();
     private String RESERV_LIST = "select * from reservation";
     private String RESERV_GET = "select * from reservation where reservation_id = ?";
-    private String RESERV_INSERT = "insert into reservation values(?, ?, ?, ?, ?)";
+    private String RESERV_INSERT = "insert into reservation (number_of_people, reservation_date, reservation_status, screening_id) values (?, ?, ?, ?)";
     private String RESERV_UPDATE = "update reservation set reservation_status = ? where reservation_id = ?";
     private String RESERV_DELETE = "delete from reservation where reservation_id = ?";
     private String RESERV_DETAIL = """
@@ -31,18 +27,35 @@ public class ReservationDaoImpl implements ReservationDao {
         group by r.reservation_id, r.reservation_date, m.title;
         """;
     private String RESERV_CANCEL = "update reservation set reservation_status = '취소' WHERE reservation_id = ?";
+    private String GET_RESERVEDSEATS =
+            """
+                    SELECT
+                    s.seat_id
+                    FROM reservation r
+                    JOIN seat_reservation sr ON r.reservation_id = sr.reservation_id
+                    JOIN seat s ON sr.seat_id = s.seat_id
+                    WHERE r.reservation_status IN ('확정', '대기') AND r.screening_id=?;
+            """;
+
 
 
     @Override
     public int create(ReservationVO reservation) throws SQLException {
-        try (PreparedStatement pstmt = conn.prepareStatement(RESERV_INSERT)) {
-            pstmt.setInt(1, reservation.getReservation_id());
-            pstmt.setInt(2, reservation.getNumber_of_people());
-            pstmt.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-            pstmt.setString(4, reservation.getReservation_status());
-            pstmt.setInt(5, reservation.getScreening_id());
-            return pstmt.executeUpdate();
+        try (PreparedStatement pstmt = conn.prepareStatement(RESERV_INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            pstmt.setInt(1, reservation.getNumber_of_people());
+            pstmt.setTimestamp(2, Timestamp.valueOf(reservation.getReservation_date()));
+            pstmt.setString(3, reservation.getReservation_status());
+            pstmt.setInt(4, reservation.getScreening_id());
+
+            pstmt.executeUpdate();
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);  // 생성된 예약 ID 반환
+                }
+            }
         }
+        return -1;
     }
 
     private ReservationVO map(ResultSet rs) throws SQLException {
@@ -131,4 +144,17 @@ public class ReservationDaoImpl implements ReservationDao {
             throw new RuntimeException(e);
         }
     }
+    @Override
+    public List<Integer> getReservedSeats(int screeningID) throws SQLException{
+        List<Integer> reservedSeats = new ArrayList<>();
+        try(PreparedStatement pstmt = conn.prepareStatement(GET_RESERVEDSEATS)){
+            pstmt.setInt(1, screeningID);
+            ResultSet rs= pstmt.executeQuery();
+            while(rs.next()){
+                reservedSeats.add(rs.getInt("seat_id")-1);
+            }
+        }
+        return reservedSeats;
+    }
+
 }
