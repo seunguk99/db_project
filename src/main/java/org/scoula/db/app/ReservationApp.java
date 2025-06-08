@@ -138,6 +138,11 @@ public class ReservationApp {
 
     public void makeReservation() {
         int num = selectNumberService.selectNOfPeople(selectedScreeningId);
+        if(num==-1){
+            System.out.println("매진된 영화입니다.");
+            System.out.println("초기화면으로 돌아갑니다.");
+            return;
+        }
         reservationService.makeReservation(selectedScreeningId,num);
         System.out.println();
         for(int i =0; i<num; i++) {
