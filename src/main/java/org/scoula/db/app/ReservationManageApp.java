@@ -47,7 +47,6 @@ public class ReservationManageApp {
             System.out.println("----------------------------------------");
             System.out.println();
         }
-//        scanner.close();
 
     }
 

@@ -11,7 +11,11 @@ public class SelectNumberServiceImpl implements SelectNumberService {
     public int selectNOfPeople(int reservationId) {
         ScreeningInformationDao dao = new ScreeningInformationImpl();
         int reservedSeats = dao.getRemainTicket(reservationId);
+        System.out.println(reservedSeats);
         int availableSeats = MAX_SEATS - reservedSeats;
+        if(availableSeats==0){
+            return -1;
+        }
         Scanner scanner = new Scanner(System.in);
         System.out.println("==========================");
         System.out.println("      인원 선택 화면      ");
